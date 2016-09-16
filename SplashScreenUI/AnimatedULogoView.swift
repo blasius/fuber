@@ -48,10 +48,10 @@ public class AnimatedULogoView: UIView {
     squareLayer = generateSquareLayer()
     maskLayer = generateMaskLayer()
     
-    layer.mask = maskLayer
+  //  layer.mask = maskLayer
     layer.addSublayer(circleLayer)
-    layer.addSublayer(lineLayer)
-    layer.addSublayer(squareLayer)
+  //  layer.addSublayer(lineLayer)
+  //  layer.addSublayer(squareLayer)
   }
   
   public func startAnimating() {
@@ -122,6 +122,33 @@ extension AnimatedULogoView {
   }
   
   private func animateCircleLayer() {
+    //strokeEnd
+    let strokeEndAnimation = CAKeyframeAnimation(keyPath: "strokeEnd")
+    strokeEndAnimation.timingFunction = strokeEndTimingFunction
+    strokeEndAnimation.duration = kAnimationDuration - kAnimationDurationDelay
+    strokeEndAnimation.values = [0.0 , 1.0]
+    strokeEndAnimation.keyTimes = [0.0 , 1.0]
+    
+    //transform
+    let transformAnimation = CABasicAnimation(keyPath: "transform")
+    transformAnimation.timingFunction = strokeEndTimingFunction
+    transformAnimation.duration = kAnimationDuration - kAnimationDurationDelay
+    
+    var startingTransform = CATransform3DMakeRotation(-CGFloat(M_PI_4), 0, 0, 0)
+    startingTransform = CATransform3DScale(startingTransform, 0.25, 0.25, 1)
+    transformAnimation.fromValue = NSValue(CATransform3D: startingTransform)
+    transformAnimation.toValue = NSValue(CATransform3D: CATransform3DIdentity)
+    
+    //Group
+    let groupAnimation = CAAnimationGroup()
+    groupAnimation.animations = [strokeEndAnimation, transformAnimation]
+    groupAnimation.repeatCount = Float.infinity
+    groupAnimation.duration = kAnimationDuration
+    groupAnimation.beginTime = beginTime
+    groupAnimation.timeOffset = startTimeOffset
+    
+    
+    circleLayer.addAnimation(groupAnimation, forKey: "looping")
   }
   
   private func animateLineLayer() {
