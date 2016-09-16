@@ -50,7 +50,7 @@ public class AnimatedULogoView: UIView {
     
   //  layer.mask = maskLayer
     layer.addSublayer(circleLayer)
-  //  layer.addSublayer(lineLayer)
+    layer.addSublayer(lineLayer)
   //  layer.addSublayer(squareLayer)
   }
   
@@ -58,10 +58,10 @@ public class AnimatedULogoView: UIView {
     beginTime = CACurrentMediaTime()
     layer.anchorPoint = CGPointZero
     
-    animateMaskLayer()
-    animateCircleLayer()
+ //   animateMaskLayer()
+ //   animateCircleLayer()
     animateLineLayer()
-    animateSquareLayer()
+ //   animateSquareLayer()
   }
   
   required public init?(coder aDecoder: NSCoder) {
@@ -152,6 +152,34 @@ extension AnimatedULogoView {
   }
   
   private func animateLineLayer() {
+    //lineWidth
+    let lineWidthAnimation = CAKeyframeAnimation(keyPath: "lineWidth")
+    lineWidthAnimation.values = [0.0, 5.0, 0.0]
+    lineWidthAnimation.timingFunctions = [strokeEndTimingFunction, circleLayerTimingFunction]
+    lineWidthAnimation.duration = kAnimationDuration
+    lineWidthAnimation.keyTimes = [0.0, 1.0-kAnimationDurationDelay/kAnimationDuration, 1.0]
+    
+    //transform
+    let transformAnimation = CAKeyframeAnimation(keyPath: "transform")
+    transformAnimation.timingFunctions = [strokeEndTimingFunction, circleLayerTimingFunction]
+    transformAnimation.duration = kAnimationDuration
+    transformAnimation.keyTimes = [0.0, 1.0-kAnimationDurationDelay/kAnimationDuration, 1.0]
+    
+    var transform = CATransform3DMakeRotation(-CGFloat(M_PI_4), 0.0, 0.0, 1.0)
+    transform = CATransform3DScale(transform, 0.25, 0.25, 1.0)
+    transformAnimation.values = [NSValue(CATransform3D: transform),
+                                 NSValue(CATransform3D: CATransform3DIdentity),
+                                 NSValue(CATransform3D: CATransform3DMakeScale(0.15, 0.15, 1.0))]
+    //Group
+    let groupAnimation = CAAnimationGroup()
+    groupAnimation.repeatCount = Float.infinity
+    groupAnimation.removedOnCompletion = false
+    groupAnimation.duration = kAnimationDuration
+    groupAnimation.beginTime = beginTime
+    groupAnimation.animations = [lineWidthAnimation, transformAnimation]
+    groupAnimation.timeOffset = startTimeOffset
+    
+    lineLayer.addAnimation(groupAnimation, forKey: "looping")
   }
   
   private func animateSquareLayer() {
